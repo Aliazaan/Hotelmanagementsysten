@@ -1,0 +1,321 @@
+package hotel;
+
+import java.util.*;
+
+class Room {
+    private String roomNumber;
+    private String roomType;
+    private boolean isOccupied;
+    private boolean isClean;
+
+    public Room(String roomNumber, String roomType) {
+        this.roomNumber = roomNumber;
+        this.roomType = roomType;
+        this.isOccupied = false;
+        this.isClean = true;
+    }
+
+    // Getters and setters
+    public String getRoomNumber() {
+        return roomNumber;
+    }
+
+    public String getRoomType() {
+        return roomType;
+    }
+
+    public boolean isOccupied() {
+        return isOccupied;
+    }
+
+    public void setOccupied(boolean occupied) {
+        isOccupied = occupied;
+    }
+
+    public boolean isClean() {
+        return isClean;
+    }
+
+    public void setClean(boolean clean) {
+        isClean = clean;
+    }
+}
+
+class Hotel {
+    private String name;
+    private String location;
+    private Map<String, Room> rooms;
+
+    public Hotel(String name, String location) {
+        this.name = name;
+        this.location = location;
+        this.rooms = new HashMap<>();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public Map<String, Room> getRooms() {
+        return rooms;
+    }
+
+    public void addRoom(String roomNumber, String roomType) {
+        rooms.put(roomNumber, new Room(roomNumber, roomType));
+    }
+
+    // Method to assign a room to a reservation
+    public boolean assignRoomToReservation(String roomNumber) {
+        Room room = rooms.get(roomNumber);
+        if (room != null && !room.isOccupied()) {
+            room.setOccupied(true);
+            return true;
+        }
+        return false;
+    }
+
+    // Method to mark a room as clean
+    public void markRoomAsClean(String roomNumber) {
+        Room room = rooms.get(roomNumber);
+        if (room != null) {
+            room.setClean(true);
+        }
+    }
+
+    // Method to mark a room as occupied
+    public void markRoomAsOccupied(String roomNumber) {
+        Room room = rooms.get(roomNumber);
+        if (room != null) {
+            room.setOccupied(true);
+        }
+    }
+
+    // Method to check room availability
+    public boolean isRoomAvailable(String roomNumber) {
+        Room room = rooms.get(roomNumber);
+        return room != null && !room.isOccupied();
+    }
+}
+
+class Reservation {
+    private String guestName;
+    private String hotelName;
+    private String roomNumber;
+    private String roomType;
+    private String checkInDate;
+    private String checkOutDate;
+    private double totalPrice;
+
+    public Reservation(String guestName, String hotelName, String roomNumber, String roomType, String checkInDate, String checkOutDate, double totalPrice) {
+        this.guestName = guestName;
+        this.hotelName = hotelName;
+        this.roomNumber = roomNumber;
+        this.roomType = roomType;
+        this.checkInDate = checkInDate;
+        this.checkOutDate = checkOutDate;
+        this.totalPrice = totalPrice;
+    }
+
+    // Getters and setters
+    // Implement getters and setters as needed
+
+    @Override
+    public String toString() {
+        return "Guest Name: " + guestName + ", Hotel: " + hotelName + ", Room Number: " + roomNumber +
+                ", Room Type: " + roomType + ", Check-in Date: " + checkInDate +
+                ", Check-out Date: " + checkOutDate + ", Total Price: " + totalPrice;
+    }
+
+    public String getHotelName() {
+        return hotelName;
+    }
+
+    public String getRoomNumber() {
+        return roomNumber;
+    }
+}
+
+public class HotelBookingSystem {
+    private static Map<Integer, Reservation> reservations = new HashMap<>();
+    private static int reservationIdCounter = 1;
+    private static Map<String, Hotel> hotels = new HashMap<>();
+
+    public static void main(String[] args) {
+        initializeHotels();
+        // Implement user account system if needed
+
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("1. Create Booking");
+            System.out.println("2. Update Booking");
+            System.out.println("3. Cancel Booking");
+            System.out.println("4. View All Bookings");
+            System.out.println("5. Exit");
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    createBooking(scanner);
+                    break;
+                case 2:
+                    updateBooking(scanner);
+                    break;
+                case 3:
+                    cancelBooking(scanner);
+                    break;
+                case 4:
+                    viewAllBookings();
+                    break;
+                case 5:
+                    System.out.println("Exiting...");
+                    scanner.close();
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please enter a number between 1 and 5.");
+            }
+        }
+    }
+
+    // Method to initialize sample hotels
+    private static void initializeHotels() {
+        // Sample hotels
+        Hotel hotel1 = new Hotel("Hotel A", "City X");
+        hotel1.addRoom("101", "Single");
+        hotel1.addRoom("102", "Single");
+        hotel1.addRoom("201", "Double");
+        hotel1.addRoom("202", "Double");
+        hotels.put("Hotel A", hotel1);
+
+        Hotel hotel2 = new Hotel("Hotel B", "City Y");
+        hotel2.addRoom("103", "Single");
+        hotel2.addRoom("203", "Double");
+        hotels.put("Hotel B", hotel2);
+    }
+
+    private static void createBooking(Scanner scanner) {
+        System.out.print("Enter guest name: ");
+        String guestName = scanner.nextLine();
+
+        System.out.print("Enter check-in date: ");
+        String checkInDate = scanner.nextLine();
+
+        System.out.print("Enter check-out date: ");
+        String checkOutDate = scanner.nextLine();
+
+        // Select room
+        System.out.println("Available Rooms:");
+        for (Hotel hotel : hotels.values()) {
+            System.out.println("Hotel: " + hotel.getName() + ", Location: " + hotel.getLocation());
+            for (Room room : hotel.getRooms().values()) {
+                if (!room.isOccupied()) {
+                    System.out.println("Room Number: " + room.getRoomNumber() + ", Room Type: " + room.getRoomType());
+                }
+            }
+        }
+        System.out.print("Enter room number: ");
+        String roomNumber = scanner.nextLine();
+
+        Room selectedRoom = null;
+        for (Hotel hotel : hotels.values()) {
+            Room room = hotel.getRooms().get(roomNumber);
+            if (room != null) {
+                selectedRoom = room;
+                break;
+            }
+        }
+
+        if (selectedRoom == null || selectedRoom.isOccupied()) {
+            System.out.println("Invalid room number or room is already occupied.");
+            return;
+        }
+
+        System.out.print("Enter room type: ");
+        String roomType = scanner.nextLine();
+        // You can add more validations and checks here
+
+        // Read price as double
+        double totalPrice;
+        while (true) {
+            System.out.print("Enter total price: ");
+            try {
+                totalPrice = Double.parseDouble(scanner.nextLine());
+                break; // Exit loop if price is successfully parsed
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid numeric price.");
+            }
+        }
+
+        // Mark room as occupied
+        selectedRoom.setOccupied(true);
+
+        // Get hotel name
+        String hotelName = null;
+        for (Hotel hotel : hotels.values()) {
+            if (hotel.getRooms().containsKey(roomNumber)) {
+                hotelName = hotel.getName();
+                break;
+            }
+        }
+
+        Reservation reservation = new Reservation(guestName, hotelName, roomNumber, roomType, checkInDate, checkOutDate, totalPrice);
+        reservations.put(reservationIdCounter++, reservation);
+        System.out.println("Booking created successfully. Booking ID: " + (reservationIdCounter - 1));
+    }
+
+    private static void updateBooking(Scanner scanner) {
+        System.out.print("Enter booking ID to update: ");
+        int bookingId = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        Reservation reservation = reservations.get(bookingId);
+        if (reservation == null) {
+            System.out.println("Booking not found.");
+            return;
+        }
+
+        System.out.println("Current details: ");
+        System.out.println(reservation);
+
+        // Implement updating reservation details
+
+        System.out.println("Booking updated successfully.");
+    }
+
+    private static void cancelBooking(Scanner scanner) {
+        System.out.print("Enter booking ID to cancel: ");
+        int bookingId = scanner.nextInt();
+
+        if (reservations.containsKey(bookingId)) {
+            // Mark room as available
+            Reservation reservation = reservations.get(bookingId);
+            Hotel hotel = hotels.get(reservation.getHotelName());
+            Room room = hotel.getRooms().get(reservation.getRoomNumber());
+            room.setOccupied(false);
+
+            reservations.remove(bookingId);
+            System.out.println("Booking with ID " + bookingId + " cancelled successfully.");
+        } else {
+            System.out.println("Booking not found.");
+        }
+    }
+    
+
+    private static void viewAllBookings() {
+        if (reservations.isEmpty()) {
+            System.out.println("No bookings found.");
+            return;
+        }
+
+        System.out.println("All Bookings:");
+        for (Map.Entry<Integer, Reservation> entry : reservations.entrySet()) {
+            System.out.println("Booking ID: " + entry.getKey() + ", " + entry.getValue());
+        }
+    }
+}
